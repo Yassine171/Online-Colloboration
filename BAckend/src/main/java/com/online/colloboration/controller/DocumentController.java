@@ -46,4 +46,17 @@ public class DocumentController {
 
         return ResponseEntity.ok(documentDtoList);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDocumentById(@PathVariable("id") Long id) {
+        documentService.deleteDocumentById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DocumentDto> updateDocument(@PathVariable("id") Long id,
+                                                      @RequestParam String name,@RequestParam("file") MultipartFile file) throws IOException {
+        DocumentDto updatedDocumentDto = documentService.updateDocument(id, name,file);
+        return ResponseEntity.ok(updatedDocumentDto);
+    }
 }
