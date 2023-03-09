@@ -1,4 +1,7 @@
+import { DocService } from './services/doc.service';
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { Doc } from './models/Doc';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +10,6 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'Online_colloboration_ui';
+
+
 }
