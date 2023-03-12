@@ -1,6 +1,10 @@
 package com.online.colloboration.controller;
 
 import com.online.colloboration.dto.DocumentDto;
+import com.online.colloboration.models.Doc;
+import com.online.colloboration.models.User;
+import com.online.colloboration.repository.UserRepository;
+import com.online.colloboration.services.DocService;
 import com.online.colloboration.services.DocumentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,11 +16,13 @@ import java.io.IOException;
 import org.springframework.security.core.Authentication;
 
 @RestController
-@RequestMapping("/documents")
+@RequestMapping("/api/documents")
 @RequiredArgsConstructor
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final DocService docService;
+    private final UserRepository userRepository;
 
 
     @PostMapping
@@ -58,5 +64,17 @@ public class DocumentController {
                                                       @RequestParam String name,@RequestParam("file") MultipartFile file) throws IOException {
         DocumentDto updatedDocumentDto = documentService.updateDocument(id, name,file);
         return ResponseEntity.ok(updatedDocumentDto);
+    }
+
+    @PostMapping("/new")
+    public ResponseEntity<Doc> createDoc(@RequestBody Doc doc) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser=userRepository.findByEmail(username).orElse(null);
+        doc.setOwner(currentUser);
+
+        // Save the new document and return it in the response
+        Doc savedDoc = docService.createDoc(doc);
+        return ResponseEntity.ok(savedDoc);
     }
 }

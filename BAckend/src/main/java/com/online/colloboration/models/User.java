@@ -43,6 +43,12 @@ public class User {
     private Set<Role> roles;
 
 
+    @ManyToMany
+    @JoinTable(name = "doc_shared_with",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "doc_id"))
+    private Set<Doc> docs;
+
     public boolean isEnabled() {
         return enabled;
     }

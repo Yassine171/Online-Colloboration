@@ -18,7 +18,7 @@ export class TokenInterceptor implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler):
         Observable<HttpEvent<any>> {
 
-        if (req.url.indexOf('refresh') !== -1 || req.url.indexOf('login') !== -1) {
+        if (req.url.indexOf('refresh') !== -1 || req.url.indexOf('login') !== -1  || req.url.indexOf('sign-up') !== -1) {
             return next.handle(req);
         }
         const jwtToken = this.authService.getJwtToken();
@@ -29,7 +29,7 @@ export class TokenInterceptor implements HttpInterceptor {
                     && (error.status === 403 || error.status === 401)) {
                     return this.handleAuthErrors(req, next);
                 } else {
-                    return throwError(error);
+                    return throwError(() => new Error(error)) ;
                 }
             }));
         }

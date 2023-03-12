@@ -2,11 +2,13 @@ import { WebSocketSubject } from 'rxjs/webSocket';
 import { DocumentService } from './../../document.service';
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Quill } from 'quill';
+import Quill, { QuillOptionsStatic } from 'quill';
+// import 'quill/dist/quill.snow.css'
 import { ActivatedRoute } from '@angular/router';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import Delta from 'quill-delta';
+import { StompService } from 'src/app/services/stomp.service';
 
 @Component({
   selector: 'app-edit-document',
@@ -20,28 +22,28 @@ export class EditDocumentComponent implements OnInit , OnDestroy {
   public editor!: Quill;
   public documentContent!: string;
 
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute,private stompService: StompService) {
     this.documentId = this.route.snapshot.params['id'];
   }
+
+
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   ngOnInit(): void {
-    this.socket = new WebSocketSubject<any>('ws://localhost:8080/document/' + this.documentId);
-
     // Subscribe to updates from the server
-    this.socket.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(
-      (message) => {
-        if (message.action === 'update') {
-          this.editor.updateContents(message.content, 'api');
-        }
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
+    this.stompService.subscribe('/topic/document/'+this.documentId, (deltaString: string) => {
+      const delta = JSON.parse(deltaString);
+      this.editor.updateContents(delta, 'api');
+    });
 
-    // Initialize the Quill editor
-    this.editor = new Quill('#editor', {
+    var quillOptions: QuillOptionsStatic = {
+      debug: 'info',
+      placeholder: 'Compose an epic...',
+      readOnly: false,
       theme: 'snow',
       modules: {
         toolbar: [
@@ -54,20 +56,20 @@ export class EditDocumentComponent implements OnInit , OnDestroy {
           ['clean']
         ]
       }
-    });
+  };
+  this.editor=new Quill('#editor', quillOptions)
+
+    // Initialize the Quill editor
 
     // Subscribe to editor changes and send them to the server
     this.editor.on('text-change', (delta, oldDelta, source) => {
       if (source === 'user') {
         const content = this.editor.getContents();
-        this.socket.next({ action: 'update', content: content });
+        const deltaString = JSON.stringify(delta);
+        const message = { delta: deltaString, content: content };
+        this.stompService.sendMessage(`/app/document/${this.documentId}`, message);
       }
     });
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.socket.complete();
   }
-}

@@ -9,7 +9,7 @@ import { Doc } from '../models/Doc';
 })
 export class DocService {
 
-  private baseUrl = 'http://localhost:8080/api//documents';
+  private baseUrl = 'http://localhost:8081/api/documents';
 
   constructor(private http: HttpClient) { }
 

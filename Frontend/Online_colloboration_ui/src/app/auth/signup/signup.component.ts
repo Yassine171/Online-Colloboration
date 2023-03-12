@@ -12,6 +12,8 @@ import { Router } from '@angular/router';
 })
 export class SignupComponent implements OnInit {
 
+
+
   signupRequestPayload: SignupRequestPayload;
   signupForm!: FormGroup;
 
@@ -20,7 +22,8 @@ export class SignupComponent implements OnInit {
     this.signupRequestPayload = {
       username: '',
       email: '',
-      password: ''
+      password: '',
+      roles: []
     };
   }
 
@@ -29,6 +32,7 @@ export class SignupComponent implements OnInit {
       username: new FormControl('', Validators.required),
       email: new FormControl('', [Validators.required, Validators.email]),
       password: new FormControl('', Validators.required),
+      roles: new FormControl([])
     });
   }
 
@@ -36,14 +40,19 @@ export class SignupComponent implements OnInit {
     this.signupRequestPayload.email = this.signupForm.get('email')?.value;
     this.signupRequestPayload.username = this.signupForm.get('username')?.value;
     this.signupRequestPayload.password = this.signupForm.get('password')?.value;
+    this.signupRequestPayload.roles?.push(this.signupForm.get('roles')?.value) ;
 
     this.authService.signup(this.signupRequestPayload)
-      .subscribe(data => {
-        this.router.navigate(['/login'],
-          { queryParams: { registered: 'true' } });
-      }, error => {
+      .subscribe({
+        next:()=> {
+          this.router.navigate(['/login'],
+            { queryParams: { registered: 'true' } });
+         },
+       error:(error)=> {
         console.log(error);
         this.toastr.error('Registration Failed! Please try again');
-      });
+      }
+    }
+      );
   }
 }

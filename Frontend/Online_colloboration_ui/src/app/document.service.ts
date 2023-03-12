@@ -9,7 +9,7 @@ export class DocumentService {
   private socket: WebSocketSubject<any>;
 
 constructor() {
-  this.socket = webSocket('ws://localhost:8080');
+  this.socket = webSocket('ws://localhost:8081');
 }
 
 updateDocument(documentContent: string): void {
