@@ -1,3 +1,4 @@
+import { AuthService } from './../auth/shared/auth.service';
 import { Injectable } from '@angular/core';
 import * as SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
@@ -7,7 +8,7 @@ import * as Stomp from 'stompjs';
 export class StompService {
 
 
-  constructor() { }
+  constructor(private authService: AuthService) { }
 
 
   socket=new SockJS('http://localhost:8081/websocket-docs');
@@ -31,17 +32,30 @@ export class StompService {
     });
   }
 
-
   sendMessage(destination: string, body: any, headers?: any): void {
     if (!this.stompClient.connected) {
-      // If not connected, attempt to connect
-      this.stompClient.connect({}, () => {
-        // After connecting, send the message
-        this.stompClient.send(destination, headers || {}, body);
-      });
+    // If not connected, attempt to connect
+    this.stompClient.connect({}, () => {
+    // After connecting, send the message
+    headers = this.addTokenHeader(headers);
+    this.stompClient.send(destination, headers || {}, body);
+    });
     } else {
-      // If already connected, send the message
-      this.stompClient.send(destination, headers || {}, body);
+    // If already connected, send the message
+    headers = this.addTokenHeader(headers);
+    this.stompClient.send(destination, headers || {}, body);
     }
-  }
+    }
+
+    private addTokenHeader(headers: any): any {
+    const token = this.authService.getJwtToken();
+    if (token) {
+    if (!headers) {
+    headers = {};
+    }
+    headers['Authorization'] = 'Bearer ' + token;
+    }
+    return headers;
+    }
 }
+

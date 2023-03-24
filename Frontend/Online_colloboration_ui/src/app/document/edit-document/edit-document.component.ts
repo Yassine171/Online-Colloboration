@@ -64,10 +64,10 @@ export class EditDocumentComponent implements OnInit , OnDestroy {
     // Subscribe to editor changes and send them to the server
     this.editor.on('text-change', (delta, oldDelta, source) => {
       if (source === 'user') {
-        const content = this.editor.getContents();
+        const content =this.editor.getText();
         const deltaString = JSON.stringify(delta);
-        const message = { delta: deltaString, content: content };
-        this.stompService.sendMessage(`/app/document/${this.documentId}`, message);
+        const message = { 'delta': deltaString, 'content': content };
+        this.stompService.sendMessage(`/app/document/${this.documentId}`, JSON.stringify(message));
       }
     });
   }

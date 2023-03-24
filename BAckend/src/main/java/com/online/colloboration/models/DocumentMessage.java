@@ -10,4 +10,6 @@ import lombok.NoArgsConstructor;
 public class DocumentMessage {
     private String delta;
     private String content;
+
+
 }
