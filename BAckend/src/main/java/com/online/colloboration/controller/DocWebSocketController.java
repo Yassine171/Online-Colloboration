@@ -31,9 +31,7 @@ public class DocWebSocketController {
     public void handleDocumentMessage(@DestinationVariable Long documentId, @Payload DocumentMessage documentMessage) throws AccessDeniedException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Principal principal = (Principal) authentication.getPrincipal();
-//
-//        log.info(documentMessage.getContent());
-//        log.info(documentMessage.getDelta());
+
         Doc document = docService.getDocById(documentId);
 
         if (document == null) {
